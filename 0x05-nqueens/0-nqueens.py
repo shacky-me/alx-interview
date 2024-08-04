@@ -1,57 +1,54 @@
 #!/usr/bin/python3
+"""
+N queens
+"""
+
 import sys
 
-def print_usage_and_exit():
-    print("Usage: nqueens N")
-    sys.exit(1)
+if len(sys.argv) != 2:
+    print('Usage: nqueens N')
+    exit(1)
 
-def print_invalid_number_and_exit():
-    print("N must be a number")
-    sys.exit(1)
+try:
+    n_q = int(sys.argv[1])
+except ValueError:
+    print('N must be a number')
+    exit(1)
 
-def print_invalid_value_and_exit():
-    print("N must be at least 4")
-    sys.exit(1)
+if n_q < 4:
+    print('N must be at least 4')
+    exit(1)
 
-def is_valid(board, row, col):
-    for i in range(row):
-        if board[i] == col or \
-           board[i] - i == col - row or \
-           board[i] + i == col + row:
+
+def solve_nqueens(n):
+    '''self descriptive'''
+    if n == 0:
+        return [[]]
+    inner_solution = solve_nqueens(n - 1)
+    return [solution + [(n, i + 1)]
+            for i in range(n_q)
+            for solution in inner_solution
+            if safe_queen((n, i + 1), solution)]
+
+
+def attack_queen(square, queen):
+    '''self descriptive'''
+    (row1, col1) = square
+    (row2, col2) = queen
+    return (row1 == row2) or (col1 == col2) or\
+        abs(row1 - row2) == abs(col1 - col2)
+
+
+def safe_queen(sqr, queens):
+    '''self descriptive'''
+    for queen in queens:
+        if attack_queen(sqr, queen):
             return False
     return True
 
-def solve_nqueens(N):
-    def solve(board, row):
-        if row == N:
-            solutions.append([[i, board[i]] for i in range(N)])
-            return
-        for col in range(N):
-            if is_valid(board, row, col):
-                board[row] = col
-                solve(board, row + 1)
-                board[row] = -1
 
-    solutions = []
-    board = [-1] * N
-    solve(board, 0)
-    return solutions
-
-def main():
-    if len(sys.argv) != 2:
-        print_usage_and_exit()
-    
-    try:
-        N = int(sys.argv[1])
-    except ValueError:
-        print_invalid_number_and_exit()
-
-    if N < 4:
-        print_invalid_value_and_exit()
-
-    solutions = solve_nqueens(N)
-    for solution in solutions:
-        print(solution)
-
-if __name__ == "__main__":
-    main()
+for answer in reversed(solve_nqueens(n_q)):
+    result = []
+    for p in [list(p) for p in answer]:
+        result.append([i - 1 for i in p])
+    print(result)
